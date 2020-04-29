@@ -52,8 +52,6 @@ namespace Ryujinx.Graphics.Gpu.Engine
 
             BufferManager  = new BufferManager(context);
             TextureManager = new TextureManager(context);
-
-            context.MemoryManager.MemoryUnmapped += _counterCache.MemoryUnmappedHandler;
         }
 
         /// <summary>
