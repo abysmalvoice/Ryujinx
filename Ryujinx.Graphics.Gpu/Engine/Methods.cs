@@ -125,6 +125,11 @@ namespace Ryujinx.Graphics.Gpu.Engine
                 UpdateShaderState(state);
             }
 
+            if (state.QueryModified(MethodOffset.ClipDistanceEnable))
+            {
+                UpdateUserClipState(state);
+            }
+
             if (state.QueryModified(MethodOffset.RasterizeEnable))
             {
                 UpdateRasterizerState(state);
@@ -846,7 +851,7 @@ namespace Ryujinx.Graphics.Gpu.Engine
                 addressesArray[index] = baseAddress + shader.Offset;
             }
 
-            GraphicsShader gs = ShaderCache.GetGraphicsShader(state, addresses);
+            ShaderBundle gs = ShaderCache.GetGraphicsShader(state, addresses);
 
             _vsUsesInstanceId = gs.Shaders[0]?.Program.Info.UsesInstanceId ?? false;
 
@@ -912,6 +917,20 @@ namespace Ryujinx.Graphics.Gpu.Engine
             }
 
             _context.Renderer.Pipeline.SetProgram(gs.HostProgram);
+        }
+
+        /// <summary>
+        /// Updates user-defined clipping based on the guest GPU state.
+        /// </summary>
+        /// <param name="state">Current GPU state</param>
+        private void UpdateUserClipState(GpuState state)
+        {
+            int clipMask = state.Get<int>(MethodOffset.ClipDistanceEnable);
+
+            for (int i = 0; i < Constants.TotalClipDistances; ++i)
+            {
+                _context.Renderer.Pipeline.SetUserClipDistance(i, (clipMask & (1 << i)) != 0);
+            }
         }
 
         /// <summary>
