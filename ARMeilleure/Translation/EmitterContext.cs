@@ -209,11 +209,6 @@ namespace ARMeilleure.Translation
             return Add(Instruction.CountLeadingZeros, Local(op1.Type), op1);
         }
 
-        internal Operand CpuId()
-        {
-            return Add(Instruction.CpuId, Local(OperandType.I64));
-        }
-
         public Operand Divide(Operand op1, Operand op2)
         {
             return Add(Instruction.Divide, Local(op1.Type), op1, op2);
@@ -609,15 +604,10 @@ namespace ARMeilleure.Translation
 
         private static bool EndsWithUnconditional(BasicBlock block)
         {
-            Operation lastOp = block.GetLastOp() as Operation;
-
-            if (lastOp == null)
-            {
-                return false;
-            }
-
-            return lastOp.Instruction == Instruction.Branch ||
-                   lastOp.Instruction == Instruction.Return;
+            return block.Operations.Last is Operation lastOp &&
+                   (lastOp.Instruction == Instruction.Branch ||
+                    lastOp.Instruction == Instruction.Return ||
+                    lastOp.Instruction == Instruction.Tailcall);
         }
 
         public ControlFlowGraph GetControlFlowGraph()
